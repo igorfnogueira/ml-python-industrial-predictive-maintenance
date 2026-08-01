@@ -4,7 +4,36 @@ Language / Idioma: **English** | [Português](README.pt-br.md)
 
 This project builds predictive maintenance models to identify five machine failure types from sensor data, covering data preparation, exploratory analysis, and multi-label classification (one binary classifier per failure).
 
-**Dataset:** `bootcamp_train.csv` — 35,260 rows × 15 columns (AI4I-like schema: `tipo` L/M/H, temperatures, torque, tool wear, etc., plus `umidade_relativa`). A formal source citation (UCI/Kaggle/plant data) is **not** documented in this repository.
+**Dataset:** `data/raw/bootcamp_train.csv` — 35,260 rows × 15 columns (AI4I-like schema: `tipo` L/M/H, temperatures, torque, tool wear, etc., plus `umidade_relativa`). A formal source citation (UCI/Kaggle/plant data) is **not** documented in this repository.
+
+## Repository structure
+
+```
+.
+├── data/raw/                 # Input dataset
+├── notebooks/                # Official experiment (Colab/bootcamp)
+├── src/                      # Python pipeline scripts
+│   ├── config.py             # Paths relative to repo root
+│   ├── data_preparation.py
+│   ├── exploratory_analysis.py
+│   ├── model_training.py
+│   ├── prediction_generation.py
+│   ├── utils.py
+│   └── main.py
+├── models/                   # .pkl artifacts (generated)
+├── outputs/                  # Predictions and outputs (generated)
+├── requirements.txt
+├── README.md
+└── README.pt-br.md
+```
+
+Run from `src/`:
+
+```bash
+pip install -r requirements.txt
+cd src
+python main.py
+```
 
 ## 1. Data Preparation and Cleaning
 
@@ -26,7 +55,7 @@ This project builds predictive maintenance models to identify five machine failu
 
 - **Preprocessing Pipeline:** `ColumnTransformer` with median imputation, `MinMaxScaler`, and `OneHotEncoder` for categorical columns.
 
-- **Models used in the official experiment** (`Projeto_Final_do_Bootcamp_CDIA.ipynb`):
+- **Models used in the official experiment** (`notebooks/Projeto_Final_do_Bootcamp_CDIA.ipynb`):
   - `RandomForestClassifier`: FDF, FP, FA
   - `GradientBoostingClassifier`: FDC, FTE  
   A formal RF vs GB head-to-head table per failure is **not versioned** in the notebook/scripts; the assignment above is what was executed and reported.
@@ -37,7 +66,7 @@ This project builds predictive maintenance models to identify five machine failu
 
 - **Imbalanced classes:** `SMOTE` applied **only on training data** and **only** for `FA (Falha Aleatoria)` (Random Failure). The test set is never resampled.
 
-- **Feature caveat (official notebook):** In the notebook's `train_and_evaluate_model`, building `X` drops `id`, `id_produto`, and the current target, but **keeps** `falha_maquina` and the other failure-type columns — a multi-label *label leakage* risk. Scripts under `Projeto/src/` use a slightly different drop logic; the metrics below come from the notebook.
+- **Feature caveat (official notebook):** In the notebook's `train_and_evaluate_model`, building `X` drops `id`, `id_produto`, and the current target, but **keeps** `falha_maquina` and the other failure-type columns — a multi-label *label leakage* risk. Scripts under `src/` use a slightly different drop logic; the metrics below come from the notebook.
 
 ## 4. Results and Conclusion
 
@@ -54,5 +83,5 @@ Official metrics on the **test holdout** (7,052 samples), positive-class F1:
 \*FA CV score is on SMOTE-augmented training folds — optimistic vs test F1 = 0.00. The 15/7,052 counts are from the **test** set, not full-dataset prevalence (~order of 75/35,260 for FA).
 
 - **Summary:** Positive-class F1 from **0.67 to 0.89** on 4 of 5 failures (best: FTE = 0.89). FA did not converge (extremely rare class). Accuracy ~1.00 is misleading under imbalance and should **not** be used as a headline.
-- **Prediction Generation:** Predictions consolidated into `predictions_classes.csv`.
-- **Project Organization:** Code restructured into Python scripts under `Projeto/src/` (`data_preparation`, `exploratory_analysis`, `model_training`, `prediction_generation`, `utils`, `main`).
+- **Prediction Generation:** Predictions consolidated into `outputs/predictions_classes.csv`.
+- **Project Organization:** Code lives under `src/` with paths centralized in `config.py`; models in `models/` and outputs in `outputs/`.

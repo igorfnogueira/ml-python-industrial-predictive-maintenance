@@ -2,7 +2,8 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-from data_preparation import preparar_dados # Importa a função para carregar e pré-processar os dados
+from data_preparation import preparar_dados
+from config import DATA_RAW_CSV
 
 def realizar_analise_exploratoria(df):
     """
@@ -122,11 +123,7 @@ def realizar_analise_exploratoria(df):
 
 
 if __name__ == '__main__':
-    # Exemplo de uso do script
-    # Substitua pelo caminho real do seu arquivo de dados
-    caminho_dados = '/content/bootcamp_train.csv'
-
-    # Prepara os dados usando a função do script data_preparation
+    caminho_dados = str(DATA_RAW_CSV)
     df_processado = preparar_dados(caminho_dados)
 
     # Realiza a análise exploratória com o DataFrame processado

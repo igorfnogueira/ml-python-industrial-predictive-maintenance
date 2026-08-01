@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
-from utils import mapear_erros # Importa a função auxiliar mapear_erros
+from utils import mapear_erros
+from config import DATA_RAW_CSV
 
 def preparar_dados(caminho_arquivo_csv):
     """
@@ -57,9 +58,7 @@ def preparar_dados(caminho_arquivo_csv):
     return df_processado
 
 if __name__ == '__main__':
-    # Exemplo de uso do script (opcional, para testar a função)
-    # Substitua pelo caminho real do seu arquivo de dados
-    caminho_dados = '/content/bootcamp_train.csv'
+    caminho_dados = str(DATA_RAW_CSV)
     df_processado = preparar_dados(caminho_dados)
 
     print("\nPrimeiras 5 linhas do DataFrame processado:")

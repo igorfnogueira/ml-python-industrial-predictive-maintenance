@@ -4,7 +4,36 @@ Language / Idioma: [English](README.md) | **Português**
 
 Este projeto desenvolve modelos de manutenção preditiva para identificar cinco tipos de falha em máquinas a partir de sensores, com preparação de dados, análise exploratória e classificação multi-rótulo (um classificador binário por falha).
 
-**Dataset:** `bootcamp_train.csv` — 35.260 linhas × 15 colunas (schema no estilo AI4I: `tipo` L/M/H, temperaturas, torque, desgaste, etc., com `umidade_relativa` adicional). Origem formal (UCI/Kaggle/planta real) não está citada nos artefatos do repositório.
+**Dataset:** `data/raw/bootcamp_train.csv` — 35.260 linhas × 15 colunas (schema no estilo AI4I: `tipo` L/M/H, temperaturas, torque, desgaste, etc., com `umidade_relativa` adicional). Origem formal (UCI/Kaggle/planta real) não está citada nos artefatos do repositório.
+
+## Estrutura do repositório
+
+```
+.
+├── data/raw/                 # Dataset de entrada
+├── notebooks/                # Experimento oficial (Colab/bootcamp)
+├── src/                      # Pipeline em scripts Python
+│   ├── config.py             # Caminhos relativos à raiz
+│   ├── data_preparation.py
+│   ├── exploratory_analysis.py
+│   ├── model_training.py
+│   ├── prediction_generation.py
+│   ├── utils.py
+│   └── main.py
+├── models/                   # Artefatos .pkl (gerados)
+├── outputs/                  # Predições e saídas (geradas)
+├── requirements.txt
+├── README.md
+└── README.pt-br.md
+```
+
+Execução a partir da pasta `src/`:
+
+```bash
+pip install -r requirements.txt
+cd src
+python main.py
+```
 
 ## 1. Preparação e Limpeza dos Dados
 
@@ -26,7 +55,7 @@ Este projeto desenvolve modelos de manutenção preditiva para identificar cinco
 
 - **Pipeline de Pré-processamento:** `ColumnTransformer` com imputação (mediana), `MinMaxScaler` e `OneHotEncoder` em categóricas.
 
-- **Modelos atribuídos no experimento oficial** (`Projeto_Final_do_Bootcamp_CDIA.ipynb`):
+- **Modelos atribuídos no experimento oficial** (`notebooks/Projeto_Final_do_Bootcamp_CDIA.ipynb`):
   - `RandomForestClassifier`: FDF, FP, FA
   - `GradientBoostingClassifier`: FDC, FTE  
   Uma tabela formal RF vs GB por falha (head-to-head) **não está versionada** no notebook/scripts; a atribuição acima é a que foi executada e reportada.
@@ -37,7 +66,7 @@ Este projeto desenvolve modelos de manutenção preditiva para identificar cinco
 
 - **Classes desbalanceadas:** `SMOTE` aplicado **somente no treino** e **somente** para `FA (Falha Aleatoria)`. O teste permanece sem reamostragem.
 
-- **Ressalva de features (notebook oficial):** Em `train_and_evaluate_model` do notebook, ao montar `X` removem-se `id`, `id_produto` e o alvo atual, mas **permanecem** `falha_maquina` e as outras colunas de tipo de falha — risco de *label leakage* em cenário multi-rótulo. Os scripts em `Projeto/src/` usam lógica de drop ligeiramente diferente; as métricas abaixo vêm do notebook.
+- **Ressalva de features (notebook oficial):** Em `train_and_evaluate_model` do notebook, ao montar `X` removem-se `id`, `id_produto` e o alvo atual, mas **permanecem** `falha_maquina` e as outras colunas de tipo de falha — risco de *label leakage* em cenário multi-rótulo. Os scripts em `src/` usam lógica de drop ligeiramente diferente; as métricas abaixo vêm do notebook.
 
 ## 4. Resultados e Conclusão
 
@@ -54,5 +83,5 @@ Métricas oficiais no **holdout de teste** (7.052 amostras), F1 da classe positi
 \*CV de FA no treino com SMOTE — otimista frente ao F1=0,00 no teste. Os 15/7.052 são contagens do **teste**, não a prevalência no dataset completo (~ordem de 75/35.260 para FA).
 
 - **Resumo:** F1 entre **0,67 e 0,89** em 4 das 5 falhas (melhor: FTE = 0,89). FA não convergiu (classe extremamente rara). Accuracy ~1,00 é ilusória pelo desbalanceamento e **não** deve ser usada como headline.
-- **Geração de Predições:** Previsões consolidadas em `predictions_classes.csv`.
-- **Organização:** Código reestruturado em scripts Python em `Projeto/src/` (`data_preparation`, `exploratory_analysis`, `model_training`, `prediction_generation`, `utils`, `main`).
+- **Geração de Predições:** Previsões consolidadas em `outputs/predictions_classes.csv`.
+- **Organização:** Código em `src/` com caminhos centralizados em `config.py`; modelos em `models/` e saídas em `outputs/`.

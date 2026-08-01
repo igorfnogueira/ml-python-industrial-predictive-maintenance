@@ -1,9 +1,10 @@
 import pandas as pd
-import joblib 
-from data_preparation import preparar_dados 
-from sklearn.model_selection import train_test_split 
+import joblib
+from data_preparation import preparar_dados
+from sklearn.model_selection import train_test_split
+from config import DATA_RAW_CSV, DEFAULT_PREDICTIONS_CSV, model_path
 
-def gerar_predicoes_csv(df_processado, pipelines_treinados, caminho_saida_csv='predictions_classes.csv'):
+def gerar_predicoes_csv(df_processado, pipelines_treinados, caminho_saida_csv=None):
     """
     Gera previsões para cada tipo de falha usando os pipelines treinados
     e salva as previsões em um arquivo CSV.
@@ -12,8 +13,11 @@ def gerar_predicoes_csv(df_processado, pipelines_treinados, caminho_saida_csv='p
         df_processado (pd.DataFrame): O DataFrame processado contendo as features.
         pipelines_treinados (dict): Um dicionário contendo os pipelines treinados para cada tipo de falha.
         caminho_saida_csv (str, optional): O caminho e nome do arquivo CSV de saída.
-                                         Padrão é 'predictions_classes.csv'.
+                                         Padrão é outputs/predictions_classes.csv.
     """
+    if caminho_saida_csv is None:
+        caminho_saida_csv = str(DEFAULT_PREDICTIONS_CSV)
+
     print("Iniciando a geração de predições e salvamento em CSV...")
 
     # Define as colunas alvo (tipos de falha) que foram usadas para treinamento
@@ -67,13 +71,13 @@ def gerar_predicoes_csv(df_processado, pipelines_treinados, caminho_saida_csv='p
     # Carregar as previsões dos arquivos .pkl (simulação para script standalone)
     predictions_dict = {}
     for falha in failure_columns:
-        model_filename = f'pipeline_{falha.replace(" ", "_").replace("(", "").replace(")", "")}.pkl'
+        model_filename = model_path(falha)
         try:
             # Carregar o pipeline treinado
             pipeline = joblib.load(model_filename)
 
             # Carregar o dataframe processado (que já tem o tratamento inicial e NaNs nas temperaturas negativas)
-            df_processado = preparar_dados('/content/bootcamp_train.csv')
+            df_processado = preparar_dados(str(DATA_RAW_CSV))
 
             # Definir as colunas alvo (tipos de falha)
             failure_columns = ['FDF (Falha Desgaste Ferramenta)', 'FDC (Falha Dissipacao Calor)',
@@ -128,7 +132,7 @@ def gerar_predicoes_csv(df_processado, pipelines_treinados, caminho_saida_csv='p
             predictions_dict = {}
             print("\nCarregando modelos e gerando previsões no conjunto de teste...")
             for falha in failure_columns:
-                model_filename = f'pipeline_{falha.replace(" ", "_").replace("(", "").replace(")", "")}.pkl'
+                model_filename = model_path(falha)
                 try:
                     pipeline = joblib.load(model_filename)
                     # Fazer previsões no conjunto de teste pré-processado
@@ -165,17 +169,9 @@ def gerar_predicoes_csv(df_processado, pipelines_treinados, caminho_saida_csv='p
 
 
 if __name__ == '__main__':
-    # Exemplo de uso do script standalone
-    # Caminho para o arquivo de dados original
-    caminho_dados_original = '/content/bootcamp_train.csv'
-    # Caminho para o arquivo CSV de saída das predições
-    caminho_saida = 'predictions_classes_standalone.csv'
+    caminho_dados_original = str(DATA_RAW_CSV)
+    caminho_saida = str(DEFAULT_PREDICTIONS_CSV.with_name('predictions_classes_standalone.csv'))
 
-    
-
-    # Carrega e pré-processa os dados (apenas tratamento inicial e NaNs)
     df_processado = preparar_dados(caminho_dados_original)
 
-    predictions_df = gerar_predicoes_csv(df_processado)
-
-    # O DataFrame com as previsões está agora em predictions_df e salvo em 'predictions_classes_standalone.csv'
+    predictions_df = gerar_predicoes_csv(df_processado, pipelines_treinados=None, caminho_saida_csv=caminho_saida)

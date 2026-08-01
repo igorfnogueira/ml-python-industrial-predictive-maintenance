@@ -1,8 +1,9 @@
 import pandas as pd
-from utils import train_and_evaluate_model # Importa a função de treinamento e avaliação
-from data_preparation import preparar_dados # Importa a função de preparação de dados
+from utils import train_and_evaluate_model
+from data_preparation import preparar_dados
 from scipy.stats import randint, uniform
-import joblib # Para salvar os modelos treinados
+import joblib
+from config import DATA_RAW_CSV, MODELS_DIR, model_path
 
 def treinar_modelos(df):
     """
@@ -77,8 +78,8 @@ def treinar_modelos(df):
             reports[target_failure] = report
             predictions[target_failure] = y_pred
 
-            # Salva o modelo treinado
-            model_filename = f'pipeline_{target_failure.replace(" ", "_").replace("(", "").replace(")", "")}.pkl'
+            MODELS_DIR.mkdir(parents=True, exist_ok=True)
+            model_filename = model_path(target_failure)
             joblib.dump(pipeline, model_filename)
             print(f"Modelo treinado para '{target_failure}' salvo como '{model_filename}'")
 
@@ -87,11 +88,7 @@ def treinar_modelos(df):
     return pipelines, reports, predictions
 
 if __name__ == '__main__':
-    # Exemplo de uso do script
-    # Substitua pelo caminho real do seu arquivo de dados
-    caminho_dados = '/content/bootcamp_train.csv'
-
-    # Prepara os dados
+    caminho_dados = str(DATA_RAW_CSV)
     df_processado = preparar_dados(caminho_dados)
 
     # Treina os modelos

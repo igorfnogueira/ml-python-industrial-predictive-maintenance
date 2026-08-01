@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+
+# Notebooks / IDE
+.ipynb_checkpoints/
+.idea/
+.vscode/
+
+# Artefatos gerados
+models/*.pkl
+outputs/*.csv
+outputs/*.png
+!models/.gitkeep
+!outputs/.gitkeep
+
+# Misc
+recovery_results.json
+.DS_Store
+Thumbs.db
